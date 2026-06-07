@@ -17,11 +17,9 @@ class Sentiment(StrEnum):
 
 class SummaryResponse(BaseModel):
     tl_dr: str = Field(description="One or two sentence summary of the whole text")
-    key_points: list[str] = Field(description="3-5 bullet-point takeaways")
-    tags: list[str] = Field(description="3-6 lowercase topic tags")
-    reading_time_minutes: int = Field(
-        description="Estimated reading time of the source"
-    )
+    key_points: list[str] = Field(min_length=3, max_length=5, description="3-5 bullet-point takeaways")
+    tags: list[str] = Field(min_length=3, max_length=6, description="3-6 lowercase topic tags")
+    reading_time_minutes: int = Field(ge=1, description="Estimated reading time of the source")
     sentiment: Sentiment
 
 
