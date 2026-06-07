@@ -1,0 +1,34 @@
+[project]
+name = "agenticai-summarizer"
+version = "0.1.0"
+description = "AI article/URL summarizer — a minimal text-to-structured-data demo"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic>=0.101.0",
+    "beautifulsoup4>=4.13.0",
+    "cyclopts>=3.0.0",
+    "python-decouple>=3.8",
+    "requests>=2.33.1",
+    "rich>=14.0.0",
+    "sqlmodel>=0.0.37",
+]
+
+[project.scripts]
+summarizer = "summarizer.cli:app"
+init-db = "summarizer.models:main"
+
+[build-system]
+requires = ["uv_build>=0.11.0,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "summarizer"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.0",
+    "ty>=0.0.25",
+]
