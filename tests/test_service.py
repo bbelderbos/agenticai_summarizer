@@ -15,8 +15,8 @@ class FakeSummarizer:
         return ScoredSummary(
             response=SummaryResponse(
                 tl_dr="canned summary",
-                key_points=["a", "b"],
-                tags=["t1"],
+                key_points=["a", "b", "c"],
+                tags=["t1", "t2", "t3"],
                 reading_time_minutes=2,
                 sentiment=Sentiment.NEUTRAL,
             ),
@@ -43,7 +43,7 @@ def test_persist_true_stores_one_row():
     rows = repo.get_all()
     assert len(rows) == 1
     assert rows[0].tl_dr == "canned summary"
-    assert rows[0].tags == ["t1"]
+    assert rows[0].tags == ["t1", "t2", "t3"]
     assert rows[0].model == "fake-model"
 
 
