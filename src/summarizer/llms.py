@@ -4,10 +4,17 @@ from typing import Protocol
 
 from anthropic import Anthropic
 from decouple import config
+from pydantic import ValidationError
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    retry_if_exception_type,
+    before_sleep_log,
+)
 
+from summarizer.exceptions import AnthropicAPIError
 from summarizer.models import ScoredSummary, SummaryResponse
 from summarizer.prompts import SYSTEM_PROMPT
-from summarizer.decorators import retry_on_validation_error
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +41,12 @@ class AnthropicSummarizer:
         self.client = client or Anthropic(api_key=config("ANTHROPIC_API_KEY"))
         self._tool_schema = SummaryResponse.model_json_schema()
 
-    @retry_on_validation_error(max_attempts=MAX_ATTEMPTS)
+    @retry(
+        stop=stop_after_attempt(MAX_ATTEMPTS),
+        retry=retry_if_exception_type(ValidationError),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True,
+    )
     def summarize(self, text: str) -> ScoredSummary:
         response = self.client.messages.create(
             model=self.model,
@@ -53,9 +65,8 @@ class AnthropicSummarizer:
 
         tool_use = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_use is None:
-            raise ValueError("Anthropic returned no tool_use block")
+            raise AnthropicAPIError("Anthropic returned no tool_use block")
 
-        # The decorator now catches this ValidationError and triggers the retry
         result = SummaryResponse.model_validate(tool_use.input)
 
         cost = self.calculate_cost(
