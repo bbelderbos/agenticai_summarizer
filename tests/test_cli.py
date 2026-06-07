@@ -1,23 +1,27 @@
 from unittest.mock import MagicMock
 import pytest
-
 from summarizer.models import Summary
 from summarizer.service import SummaryResult
 
+# Target our imports from the actual package structure
 from summarizer.cli import app
 
 
 @pytest.fixture
 def mock_dependencies(mocker):
     """Fixture to mock all external service/repo layers and configure Cyclopts for testing."""
-    mock_repo_cls = mocker.patch("summarizer.repo.DBSummaryRepo")
-    mock_service_cls = mocker.patch("summarizer.service.SummarizerService")
+    mock_repo_cls = mocker.patch("summarizer.cli.DBSummaryRepo")
+    mock_service_cls = mocker.patch("summarizer.cli.SummarizerService")
     mock_config = mocker.patch("summarizer.cli.config")
     mock_console = mocker.patch("summarizer.cli.console")
 
-    mock_config.return_value = "mocked_db_url"
+    # Mock Anthropic to prevent Pydantic Validation errors from real invocations
+    mocker.patch("summarizer.cli.AnthropicSummarizer")
 
-    # CRITICAL: Prevents Cyclopts from calling sys.exit() during test execution
+    # FIX: Use a valid SQLAlchemy format string so create_engine doesn't crash
+    mock_config.return_value = "sqlite:///:memory:"
+
+    # Prevents Cyclopts from calling sys.exit() during test execution
     app.result_action = "return_value"
 
     return {
@@ -49,7 +53,6 @@ def test_summarize_without_db(mock_dependencies, mocker):
     mock_service.summarize.return_value = mock_result
 
     # Act
-    # Pass CLI arguments directly into the Cyclopts app instance
     app(["summarize", "http://example.com"])
 
     # Assert
@@ -91,7 +94,7 @@ def test_summarize_with_db(mock_dependencies, mocker):
 
     # Assert
     # Repo should be initialized with the URL fetched from config()
-    mock_dependencies["repo_cls"].assert_called_once_with("mocked_db_url")
+    mock_dependencies["repo_cls"].assert_called_once_with("sqlite:///:memory:")
 
     # Service should be passed the active database repo instance
     mock_dependencies["service_cls"].assert_called_once_with(mocker.ANY, repo=mock_repo)
