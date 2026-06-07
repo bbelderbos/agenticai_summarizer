@@ -4,10 +4,10 @@ from typing import Protocol
 
 from anthropic import Anthropic
 from decouple import config
-from pydantic import ValidationError
 
 from summarizer.models import ScoredSummary, SummaryResponse
 from summarizer.prompts import SYSTEM_PROMPT
+from summarizer.decorators import retry_on_validation_error
 
 logger = logging.getLogger(__name__)
 
@@ -34,46 +34,34 @@ class AnthropicSummarizer:
         self.client = client or Anthropic(api_key=config("ANTHROPIC_API_KEY"))
         self._tool_schema = SummaryResponse.model_json_schema()
 
+    @retry_on_validation_error(max_attempts=MAX_ATTEMPTS)
     def summarize(self, text: str) -> ScoredSummary:
-        for attempt in range(1, MAX_ATTEMPTS + 1):
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=1024,
-                system=SYSTEM_PROMPT,
-                tools=[
-                    {
-                        "name": TOOL_NAME,
-                        "description": "Record the structured summary of the article.",
-                        "input_schema": self._tool_schema,
-                    }
-                ],
-                tool_choice={"type": "tool", "name": TOOL_NAME},
-                messages=[{"role": "user", "content": text}],
-            )
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            tools=[
+                {
+                    "name": TOOL_NAME,
+                    "description": "Record the structured summary of the article.",
+                    "input_schema": self._tool_schema,
+                }
+            ],
+            tool_choice={"type": "tool", "name": TOOL_NAME},
+            messages=[{"role": "user", "content": text}],
+        )
 
-            tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-            if tool_use is None:
-                raise ValueError("Anthropic returned no tool_use block")
+        tool_use = next((b for b in response.content if b.type == "tool_use"), None)
+        if tool_use is None:
+            raise ValueError("Anthropic returned no tool_use block")
 
-            try:
-                result = SummaryResponse.model_validate(tool_use.input)
-            except ValidationError:
-                if attempt == MAX_ATTEMPTS:
-                    logger.exception(
-                        "tool input failed validation after %d attempts", MAX_ATTEMPTS
-                    )
-                    raise
-                logger.warning(
-                    "malformed tool input on attempt %d/%d, retrying",
-                    attempt,
-                    MAX_ATTEMPTS,
-                )
-                continue
+        # The decorator now catches this ValidationError and triggers the retry
+        result = SummaryResponse.model_validate(tool_use.input)
 
-            cost = self.calculate_cost(
-                response.usage.input_tokens, response.usage.output_tokens
-            )
-            return ScoredSummary(response=result, cost=cost)
+        cost = self.calculate_cost(
+            response.usage.input_tokens, response.usage.output_tokens
+        )
+        return ScoredSummary(response=result, cost=cost)
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> Decimal:
         try:
