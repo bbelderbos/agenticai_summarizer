@@ -56,6 +56,30 @@ uv run summarizer summarize "long text here..." --db
 uv run summarizer list
 ```
 
+### Example output
+
+```text
+$ uv run summarizer summarize https://belderbos.dev/blog/htmx-hx-swap-oob-django/ --db
+                                                         Summary
+┌──────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Source       │ https://belderbos.dev/blog/htmx-hx-swap-oob-django/                                                     │
+│ TL;DR        │ This article explains how to use htmx's out-of-band swaps (hx-swap-oob) to update multiple unrelated    │
+│              │ page elements from a single HTTP request, avoiding the need to duplicate server-side logic in          │
+│              │ JavaScript.                                                                                            │
+│ Key points   │ • Out-of-band swaps allow htmx to update elements outside the main target by using the hx-swap-oob      │
+│              │ attribute on elements in the response.                                                                 │
+│              │ • Use hx-swap-oob="innerHTML:#selector" to update an element's inner content without replacing the      │
+│              │ element itself, preserving attached event listeners.                                                   │
+│              │ • Centralizing data fetching and rendering logic in the view prevents code duplication and maintains a  │
+│              │ single source of truth for business rules.                                                             │
+│ Tags         │ htmx, web development, django, python, oob-swaps, frontend architecture                                 │
+│ Reading time │ 5 min                                                                                                  │
+│ Sentiment    │ positive                                                                                               │
+│ Cost         │ $0.004491                                                                                              │
+│ Saved        │ yes                                                                                                    │
+└──────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 ## Tests
 
 ```bash
