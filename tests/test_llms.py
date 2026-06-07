@@ -11,8 +11,8 @@ from summarizer.models import Sentiment
 def _tool_input() -> dict:
     return {
         "tl_dr": "A short summary.",
-        "key_points": ["point one", "point two"],
-        "tags": ["python", "ai"],
+        "key_points": ["point one", "point two", "point three"],
+        "tags": ["python", "ai", "testing"],
         "reading_time_minutes": 4,
         "sentiment": "positive",
     }
@@ -63,7 +63,7 @@ def test_summarize_parses_tool_use_into_model():
     result = _make_summarizer(client).summarize("some article text")
 
     assert result.response.tl_dr == "A short summary."
-    assert result.response.key_points == ["point one", "point two"]
+    assert result.response.key_points == ["point one", "point two", "point three"]
     assert result.response.sentiment is Sentiment.POSITIVE
     # 1000 in @ $1/Mtok + 200 out @ $5/Mtok = 0.001 + 0.001 = 0.002
     assert result.cost == Decimal("0.002")
@@ -79,7 +79,7 @@ def test_summarize_retries_on_malformed_tool_input():
     result = _make_summarizer(client).summarize("some article text")
 
     assert client.calls == 2
-    assert result.response.key_points == ["point one", "point two"]
+    assert result.response.key_points == ["point one", "point two", "point three"]
 
 
 def test_summarize_raises_after_exhausting_retries():
