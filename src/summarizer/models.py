@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
@@ -22,11 +23,12 @@ class SummaryResponse(BaseModel):
         description="Estimated reading time of the source"
     )
     sentiment: Sentiment
-    cost: Decimal = Field(
-        default=Decimal("0"),
-        description="Leave as 0 — set programmatically after the API call",
-    )
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+@dataclass(frozen=True)
+class ScoredSummary:
+    response: SummaryResponse
+    cost: Decimal
 
 
 class Summary(SQLModel, table=True):

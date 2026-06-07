@@ -1,7 +1,9 @@
 from decimal import Decimal
 from unittest.mock import patch
 
-from summarizer.models import Sentiment, SummaryResponse
+import pytest
+
+from summarizer.models import ScoredSummary, Sentiment, SummaryResponse
 from summarizer.repo import InMemorySummaryRepo
 from summarizer.service import SummarizerService
 
@@ -9,13 +11,15 @@ from summarizer.service import SummarizerService
 class FakeSummarizer:
     model = "fake-model"
 
-    def summarize(self, text: str) -> SummaryResponse:
-        return SummaryResponse(
-            tl_dr="canned summary",
-            key_points=["a", "b"],
-            tags=["t1"],
-            reading_time_minutes=2,
-            sentiment=Sentiment.NEUTRAL,
+    def summarize(self, text: str) -> ScoredSummary:
+        return ScoredSummary(
+            response=SummaryResponse(
+                tl_dr="canned summary",
+                key_points=["a", "b"],
+                tags=["t1"],
+                reading_time_minutes=2,
+                sentiment=Sentiment.NEUTRAL,
+            ),
             cost=Decimal("0.01"),
         )
 
@@ -41,6 +45,12 @@ def test_persist_true_stores_one_row():
     assert rows[0].tl_dr == "canned summary"
     assert rows[0].tags == ["t1"]
     assert rows[0].model == "fake-model"
+
+
+def test_persist_without_repo_raises():
+    with patch("summarizer.service.fetch_text", return_value="text"):
+        with pytest.raises(ValueError):
+            _service().summarize("hello", persist=True)
 
 
 def test_url_source_label_kept_text_label_otherwise():

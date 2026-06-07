@@ -6,7 +6,7 @@ from anthropic import Anthropic
 from decouple import config
 from pydantic import ValidationError
 
-from summarizer.models import SummaryResponse
+from summarizer.models import ScoredSummary, SummaryResponse
 from summarizer.prompts import SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
@@ -25,27 +25,21 @@ PRICING_PER_MTOK: dict[str, tuple[Decimal, Decimal]] = {
 class Summarizer(Protocol):
     model: str
 
-    def summarize(self, text: str) -> SummaryResponse: ...
+    def summarize(self, text: str) -> ScoredSummary: ...
 
 
 class AnthropicSummarizer:
-    def __init__(self, model: str | None = None, api_key: str | None = None):
+    def __init__(self, model: str | None = None, client: Anthropic | None = None):
         self.model = model or config("SUMMARIZER_MODEL", default=DEFAULT_MODEL)
-        self.client = Anthropic(api_key=api_key or config("ANTHROPIC_API_KEY"))
+        self.client = client or Anthropic(api_key=config("ANTHROPIC_API_KEY"))
         self._tool_schema = SummaryResponse.model_json_schema()
 
-    def summarize(self, text: str) -> SummaryResponse:
+    def summarize(self, text: str) -> ScoredSummary:
         for attempt in range(1, MAX_ATTEMPTS + 1):
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=1024,
-                system=[
-                    {
-                        "type": "text",
-                        "text": SYSTEM_PROMPT,
-                        "cache_control": {"type": "ephemeral"},
-                    }
-                ],
+                system=SYSTEM_PROMPT,
                 tools=[
                     {
                         "name": TOOL_NAME,
@@ -76,15 +70,18 @@ class AnthropicSummarizer:
                 )
                 continue
 
-            result.cost = self.calculate_cost(
+            cost = self.calculate_cost(
                 response.usage.input_tokens, response.usage.output_tokens
             )
-            return result
+            return ScoredSummary(response=result, cost=cost)
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> Decimal:
-        input_rate, output_rate = PRICING_PER_MTOK.get(
-            self.model, (Decimal("1"), Decimal("5"))
-        )
+        try:
+            input_rate, output_rate = PRICING_PER_MTOK[self.model]
+        except KeyError:
+            raise ValueError(
+                f"no pricing configured for model {self.model!r}"
+            ) from None
         return (
             Decimal(prompt_tokens) * input_rate
             + Decimal(completion_tokens) * output_rate

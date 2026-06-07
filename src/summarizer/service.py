@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 
 from summarizer.fetch import fetch_text
 from summarizer.llms import Summarizer
@@ -12,6 +13,7 @@ EXCERPT_CHARS = 200
 class SummaryResult:
     response: SummaryResponse
     source: str
+    cost: Decimal
     persisted: bool
 
 
@@ -22,12 +24,15 @@ class SummarizerService:
 
     def summarize(self, source: str, persist: bool = False) -> SummaryResult:
         text = fetch_text(source)
-        response = self.summarizer.summarize(text)
+        scored = self.summarizer.summarize(text)
+        response = scored.response
 
         is_url = source.startswith(("http://", "https://"))
         label = source if is_url else "text"
 
-        if persist and self.repo is not None:
+        if persist:
+            if self.repo is None:
+                raise ValueError("persist=True requires a repository")
             self.repo.add(
                 Summary(
                     source=label,
@@ -38,8 +43,10 @@ class SummarizerService:
                     reading_time_minutes=response.reading_time_minutes,
                     sentiment=response.sentiment,
                     model=self.summarizer.model,
-                    cost=response.cost,
+                    cost=scored.cost,
                 )
             )
 
-        return SummaryResult(response=response, source=label, persisted=persist)
+        return SummaryResult(
+            response=response, source=label, cost=scored.cost, persisted=persist
+        )

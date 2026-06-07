@@ -55,20 +55,16 @@ class SequenceAnthropicClient:
 
 
 def _make_summarizer(client) -> AnthropicSummarizer:
-    summarizer = AnthropicSummarizer.__new__(AnthropicSummarizer)
-    summarizer.model = "claude-haiku-4-5"
-    summarizer.client = client
-    summarizer._tool_schema = {}
-    return summarizer
+    return AnthropicSummarizer(model="claude-haiku-4-5", client=client)
 
 
 def test_summarize_parses_tool_use_into_model():
     client = FakeAnthropicClient(_tool_input(), input_tokens=1000, output_tokens=200)
     result = _make_summarizer(client).summarize("some article text")
 
-    assert result.tl_dr == "A short summary."
-    assert result.key_points == ["point one", "point two"]
-    assert result.sentiment is Sentiment.POSITIVE
+    assert result.response.tl_dr == "A short summary."
+    assert result.response.key_points == ["point one", "point two"]
+    assert result.response.sentiment is Sentiment.POSITIVE
     # 1000 in @ $1/Mtok + 200 out @ $5/Mtok = 0.001 + 0.001 = 0.002
     assert result.cost == Decimal("0.002")
 
@@ -83,7 +79,7 @@ def test_summarize_retries_on_malformed_tool_input():
     result = _make_summarizer(client).summarize("some article text")
 
     assert client.calls == 2
-    assert result.key_points == ["point one", "point two"]
+    assert result.response.key_points == ["point one", "point two"]
 
 
 def test_summarize_raises_after_exhausting_retries():
@@ -97,5 +93,5 @@ def test_summarize_raises_after_exhausting_retries():
 
 
 def test_calculate_cost_uses_model_pricing():
-    summarizer = _make_summarizer(client=None)
+    summarizer = _make_summarizer(client=SimpleNamespace())
     assert summarizer.calculate_cost(1_000_000, 1_000_000) == Decimal("6")

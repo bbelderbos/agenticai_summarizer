@@ -25,7 +25,7 @@ def _render_result(result: SummaryResult) -> None:
     table.add_row("Tags", ", ".join(response.tags))
     table.add_row("Reading time", f"{response.reading_time_minutes} min")
     table.add_row("Sentiment", response.sentiment)
-    table.add_row("Cost", f"${response.cost:.6f}")
+    table.add_row("Cost", f"${result.cost:.6f}")
     table.add_row("Saved", "yes" if result.persisted else "no")
     console.print(table)
 
