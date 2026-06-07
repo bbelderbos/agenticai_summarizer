@@ -5,3 +5,17 @@ hooks = [
   { id = "check-yaml" },
   { id = "end-of-file-fixer" },
 ]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "ruff-format", name = "ruff format", entry = "uv run ruff format", language = "system", types = ["python"] },
+  { id = "ruff-check", name = "ruff check", entry = "uv run ruff check --fix", language = "system", types = ["python"] },
+]
+
+[[repos]]
+repo = "https://github.com/facebook/pyrefly-pre-commit"
+rev = "1.0.0"
+hooks = [
+  { id = "pyrefly-check", name = "Pyrefly (type checking)", language = "system", pass_filenames = false },
+]
