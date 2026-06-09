@@ -19,6 +19,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "jg-lint" },
     { name = "prek" },
     { name = "pyrefly" },
     { name = "pytest" },
@@ -41,6 +42,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "jg-lint", specifier = ">=0.5.0" },
     { name = "prek", specifier = ">=0.4.4" },
     { name = "pyrefly", specifier = ">=1.0.0" },
     { name = "pytest", specifier = ">=9.0.0" },
@@ -334,6 +336,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/72/34/14ca021ce8e5dfedc35312d08ba8bf51fdd999c576889fc2c24cb97f4f10/iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730", size = 20503, upload-time = "2025-10-18T21:55:43.219Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl", hash = "sha256:f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12", size = 7484, upload-time = "2025-10-18T21:55:41.639Z" },
+]
+
+[[package]]
+name = "jg-lint"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/ec/5a1ed56180167b21b30d9cffb76d997cb4fc6450ba04e2157ce8253b1f5a/jg_lint-0.5.0.tar.gz", hash = "sha256:fadf979c75a155ca641247d6ba939ca6dd8bd867ae00ff42c67275371b9bd1f0", size = 25515, upload-time = "2026-05-21T14:37:03.562Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/2d/cb5caa36efb29cd6d617fed09467b95a3685f19c7d42dbead6bf5fac6806/jg_lint-0.5.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:19d590ede123973d4e3d18fddad198d8f7b458c848bb0d13372728dfbfcaffcd", size = 1191165, upload-time = "2026-05-21T14:36:51.803Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/21/9cddf23776dfb06f8a8cf41e230bd91a879cce1ddefb2bcc4cfb82249092/jg_lint-0.5.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:562c777bfee2aad53af71186d918febcbe41ba376c22155744bbeb46c9cfb67a", size = 1148044, upload-time = "2026-05-21T14:36:53.54Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/26/e4fcbfea93ec2551dcbeed051bd28fde89bf22aacac5314705724b7d6995/jg_lint-0.5.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fd92b341493862117620792187ba1a364fd5ac4dc8387246da9b9dca439cc281", size = 1285117, upload-time = "2026-05-21T14:36:55.157Z" },
+    { url = "https://files.pythonhosted.org/packages/19/54/aeede4ffbb1a9b77f8f73daf3bc07b4b6e6038db92f57144a2ee6d71bf66/jg_lint-0.5.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:be81aee172ba0bf39e9f28451b5c4d43953f8081ea5da3b05d7634c83085149d", size = 1308136, upload-time = "2026-05-21T14:36:56.915Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/50/4cb7620c09559a7c9b601199a448c5e6ae7e206f26c1063cef59a382da02/jg_lint-0.5.0-cp314-cp314-win_amd64.whl", hash = "sha256:f412e068e250d2586d9e15006496daafcdca775c0c696e27b0de988b8d5229e8", size = 1044135, upload-time = "2026-05-21T14:36:58.527Z" },
+    { url = "https://files.pythonhosted.org/packages/43/6e/9364058328e5e7b6fd8caabc6d4b77e9d70fc82c3a2874e4dd6e59b2b028/jg_lint-0.5.0-cp314-cp314t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6b2c09a6024a38617ee669a4f7732493de27db095e34812a1cad5b305067d9ae", size = 1284411, upload-time = "2026-05-21T14:37:00.486Z" },
+    { url = "https://files.pythonhosted.org/packages/03/27/2b2698ab009b60fa0783f82e7102fd2365e3463785c0b46c1798daf79aa8/jg_lint-0.5.0-cp315-cp315-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4beafb6f5ef98c7767f9707f23a7a3080a4ac8469d9af54f98af9eac9a392983", size = 1308278, upload-time = "2026-05-21T14:37:02.17Z" },
 ]
 
 [[package]]
