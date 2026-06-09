@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 
+from decouple import config
 from pydantic import BaseModel, Field
 from sqlalchemy import JSON, Column
 from sqlmodel import Field as SQLField
@@ -44,8 +45,6 @@ class Summary(SQLModel, table=True):
 
 
 def main() -> None:
-    from decouple import config
-
     engine = create_engine(config("DATABASE_URL"))
     SQLModel.metadata.create_all(engine)
     print("database initialized")
